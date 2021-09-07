@@ -2,8 +2,8 @@
 
 /* -------------------  MOBILE  --------------------- */
 header {
-  background-image: url('https://via.placeholder.com/1150');
-}
+    background-image: url(./../media/image.jpg);
+  }
 
 main#two-columns {
     margin: 50px 0;
