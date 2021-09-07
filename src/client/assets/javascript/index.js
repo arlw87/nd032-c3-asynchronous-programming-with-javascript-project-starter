@@ -5,6 +5,7 @@ var store = {
 	track_id: undefined,
 	player_id: undefined,
 	race_id: undefined,
+	tracks: undefined
 }
 
 // We need our javascript to wait until the DOM is loaded
@@ -17,6 +18,7 @@ async function onPageLoad() {
 	try {
 		const tracks = await getTracks();
 		const html = renderTrackCards(tracks);
+		tracksToStore(tracks);
 		renderAt('#tracks', html);
 	} catch (error) {
 		const errorHtml = `<h4 style='color:red'>Could not download track information</h4>`;
@@ -35,6 +37,10 @@ async function onPageLoad() {
 		console.log(error);
 		console.error(error);
 	}
+}
+
+function tracksToStore(tracks) {
+	store.tracks = tracks;
 }
 
 function setupClickHandlers() {
@@ -79,17 +85,26 @@ async function delay(ms) {
 
 // This async function controls the flow of the race, add the logic and error handling
 async function handleCreateRace() {
+
+	//Get player_id and track_id from the store
+	const player_id = store.player_id;
+	const track_id = store.track_id;
+
+	//Get tracks info from store
+	const track_info = store.tracks[parseInt(track_id) - 1];
+
 	// render starting UI
-	renderAt('#race', renderRaceStartView())
+	renderAt('#race', renderRaceStartView(track_info))
 
-	// TODO - Get player_id and track_id from the store
+	const race = await createRace(player_id, track_id);
+	console.log(race);
 
-	// const race = TODO - invoke the API call to create the race, then save the result
-
-	// TODO - update the store with the race id
+	//update the store with the race id
+	store.race_id = race.ID;
 
 	// The race has been created, now start the countdown
 	// TODO - call the async function runCountdown
+	await runCountdown();
 
 	// TODO - call the async function startRace
 
@@ -124,18 +139,24 @@ async function runCountdown() {
 		let timer = 3
 
 		return new Promise(resolve => {
-			// TODO - use Javascript's built in setInterval method to count down once per second
-
-			// run this DOM manipulation to decrement the countdown for the user
-			document.getElementById('big-numbers').innerHTML = --timer
-
-			// TODO - if the countdown is done, clear the interval, resolve the promise, and return
-
-		})
+			const countDown = setInterval(((timer) => {
+				return function () {
+					document.getElementById('big-numbers').innerHTML = --timer;
+					if (timer === 0) {
+						resolve();
+						clearInterval(countDown);
+					}
+				}
+			})(timer), 1000);
+		});
 	} catch (error) {
 		console.log(error);
 	}
 }
+
+
+
+
 
 function handleSelectPodRacer(target) {
 	console.log("selected a pod", target.id)
@@ -172,6 +193,7 @@ function handleSelectTrack(target) {
 }
 
 function viewStore() {
+	console.log('here is the store');
 	console.log(store);
 }
 
@@ -246,6 +268,7 @@ function renderCountdown(count) {
 }
 
 function renderRaceStartView(track, racers) {
+	console.log('track: ', track);
 	return `
 		<header>
 			<h1>Race: ${track.name}</h1>
