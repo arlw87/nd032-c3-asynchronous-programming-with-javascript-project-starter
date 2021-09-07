@@ -150,6 +150,8 @@ function handleSelectPodRacer(target) {
 	target.classList.add('selected')
 
 	// TODO - save the selected racer to the store
+	store.player_id = target.id
+	viewStore();
 }
 
 function handleSelectTrack(target) {
@@ -164,8 +166,13 @@ function handleSelectTrack(target) {
 	// add class selected to current target
 	target.classList.add('selected')
 
-	// TODO - save the selected track id to the store
+	//save the selected track id to the store
+	store.track_id = target.id
+	viewStore();
+}
 
+function viewStore() {
+	console.log(store);
 }
 
 function handleAccelerate() {
@@ -325,7 +332,6 @@ function defaultFetchOpts() {
 // TODO - Make a fetch call (with error handling!) to each of the following API endpoints 
 
 async function getTracks() {
-	// GET request to `${SERVER}/api/tracks`
 	try {
 		const response = await fetch(`${SERVER}/api/tracks`)
 		const tracks = await response.json();
@@ -337,7 +343,6 @@ async function getTracks() {
 }
 
 async function getRacers() {
-	// GET request to `${SERVER}/api/cars`
 	try {
 		const response = await fetch(`${SERVER}/api/cars`)
 		const racers = await response.json();
